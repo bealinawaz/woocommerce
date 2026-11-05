@@ -17,6 +17,8 @@ use Automattic\WooCommerce\Internal\Abilities\Domain\OrderUpdate;
 use Automattic\WooCommerce\Internal\Abilities\Domain\OrderUpdateStatus;
 use Automattic\WooCommerce\Internal\Abilities\Domain\OrdersQuery;
 use Automattic\WooCommerce\Internal\Abilities\Domain\PaymentGatewaysQuery;
+use Automattic\WooCommerce\Internal\Abilities\Domain\ProductAttributeCreate;
+use Automattic\WooCommerce\Internal\Abilities\Domain\ProductAttributesQuery;
 use Automattic\WooCommerce\Internal\Abilities\Domain\ProductCreate;
 use Automattic\WooCommerce\Internal\Abilities\Domain\ProductDelete;
 use Automattic\WooCommerce\Internal\Abilities\Domain\ProductUpdate;
@@ -54,6 +56,8 @@ class AbilitiesLoader {
 		PaymentGatewaysQuery::class,
 		ProductsQuery::class,
 		ProductTermsQuery::class,
+		ProductAttributesQuery::class,
+		ProductAttributeCreate::class,
 		ProductCreate::class,
 		ProductDelete::class,
 		ProductUpdate::class,
