@@ -163,12 +163,25 @@ class OrdersQuery extends AbstractDomainAbility implements AbilityDefinition {
 			$args['exclude'] = array_merge( (array) ( $args['exclude'] ?? array() ), $extension_args['post__not_in'] );
 			unset( $extension_args['post__not_in'] );
 		}
-		if ( isset( $extension_args['post__in'] ) && ! empty( $args['exclude'] ) ) {
-			$include                    = array_values( array_diff( $extension_args['post__in'], (array) $args['exclude'] ) );
+		$hpos = OrderUtil::custom_orders_table_usage_is_enabled();
+
+		if ( ! empty( $input['search'] ) ) {
+			if ( $hpos ) {
+				$args['s'] = $input['search'];
+			} else {
+				// Posts storage matches `s` against post title and content only, which orders leave empty.
+				$matches                    = wc_order_search( $input['search'] );
+				$extension_args['post__in'] = isset( $extension_args['post__in'] ) ? array_intersect( $extension_args['post__in'], $matches ) : $matches;
+			}
+		}
+
+		// WP_Query ignores post__not_in once post__in is set, and treats an empty post__in as no filter.
+		if ( isset( $extension_args['post__in'] ) ) {
+			$include                    = array_values( array_diff( $extension_args['post__in'], (array) ( $args['exclude'] ?? array() ) ) );
 			$extension_args['post__in'] = empty( $include ) ? array( 0 ) : $include;
 		}
 
-		if ( OrderUtil::custom_orders_table_usage_is_enabled() ) {
+		if ( $hpos ) {
 			$args = array_merge_recursive( $args, $extension_args );
 		} else {
 			$args[ AbilitiesLoader::EXTENSION_QUERY_VAR ] = $extension_args;
@@ -264,6 +277,11 @@ class OrdersQuery extends AbstractDomainAbility implements AbilityDefinition {
 				'billing_email'      => array(
 					'type'   => 'string',
 					'format' => 'email',
+				),
+				'search'             => array(
+					'type'        => 'string',
+					'description' => __( 'Find orders whose customer name, billing email or product names contain this text. A search can match a product as well as a customer, so filter by customer_id to limit results to one customer.', 'woocommerce' ),
+					'pattern'     => '\S',
 				),
 				'parent'             => array(
 					'type'        => 'integer',
